@@ -532,3 +532,4 @@ document.addEventListener('DOMContentLoaded', () => {
   if (isHomePage) renderShopCards();
   if (isShopPage) initShopPage();
 });
+
