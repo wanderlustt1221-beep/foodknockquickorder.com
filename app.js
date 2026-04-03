@@ -1,6 +1,7 @@
 /**
- * FoodKnock Quick Order — Main App JS v2
+ * FoodKnock Quick Order — Main App JS v4
  * Premium PWA: routing, cart, localStorage, WhatsApp order, UI, install prompt
+ * FULLY FIXED FOR MOBILE INSTALLATION
  */
 
 /* =========================================================
@@ -8,10 +9,12 @@
    ========================================================= */
 const CART_STORAGE_KEY = 'fk_carts_v2';
 const PAGE_SHOP_PARAM = 'shop';
+const INSTALL_DISMISSED_KEY = 'fk_install_dismissed';
 
 let currentShopId = null;
 let carts = {};
 let deferredInstallPrompt = null; // PWA install event
+let isAppInstalled = false;
 
 /* =========================================================
    LOCAL STORAGE — SAFE READ/WRITE
@@ -88,55 +91,201 @@ function registerServiceWorker() {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/foodknockquickorder.com/service-worker.js')
         .then(reg => {
-          console.log('[FK] SW registered:', reg.scope);
+          console.log('[FK] ✅ SW registered:', reg.scope);
+          
+          // Check for updates
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            console.log('[FK] New service worker found, installing...');
+            
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[FK] New service worker installed, reload to update');
+              }
+            });
+          });
         })
         .catch(err => {
-          console.warn('[FK] SW registration failed:', err);
+          console.warn('[FK] ❌ SW registration failed:', err);
         });
     });
+  } else {
+    console.warn('[FK] Service Workers not supported');
   }
 }
 
 /* =========================================================
-   PWA — INSTALL PROMPT
+   PWA — INSTALL PROMPT (ENHANCED & FIXED)
    ========================================================= */
 function initInstallPrompt() {
   const bar = document.getElementById('fk-install-bar');
   const installBtn = document.getElementById('fk-install-btn');
   const dismissBtn = document.getElementById('fk-install-dismiss');
-  if (!bar) return;
+  
+  if (!bar) {
+    console.warn('[FK] Install bar element not found');
+    return;
+  }
 
-  // Don't show if already dismissed this session
-  if (sessionStorage.getItem('fk_install_dismissed')) return;
+  // Check if app is already installed
+  checkIfInstalled();
 
+  // If already installed, hide banner permanently
+  if (isAppInstalled) {
+    console.log('[FK] ✅ App already installed, hiding banner');
+    bar.classList.remove('visible');
+    return;
+  }
+
+  // Check if user previously dismissed (this session only)
+  if (sessionStorage.getItem(INSTALL_DISMISSED_KEY)) {
+    console.log('[FK] Install banner dismissed this session');
+    return;
+  }
+
+  // Listen for beforeinstallprompt event
   window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('[FK] 🎯 beforeinstallprompt fired!');
+    
+    // Prevent Chrome's default install prompt
     e.preventDefault();
+    
+    // Store the event for later use
     deferredInstallPrompt = e;
+    
+    // Show custom install banner
     bar.classList.add('visible');
+    console.log('[FK] Custom install banner shown');
   });
 
+  // Install button click handler
   if (installBtn) {
     installBtn.addEventListener('click', async () => {
-      if (!deferredInstallPrompt) return;
+      console.log('[FK] Install button clicked');
+      
+      if (!deferredInstallPrompt) {
+        console.warn('[FK] No install prompt available');
+        showManualInstallInstructions();
+        return;
+      }
+
+      // Show the browser's install prompt
       deferredInstallPrompt.prompt();
+      console.log('[FK] Install prompt shown to user');
+
+      // Wait for user's response
       const { outcome } = await deferredInstallPrompt.userChoice;
       console.log('[FK] Install outcome:', outcome);
+
+      if (outcome === 'accepted') {
+        console.log('[FK] ✅ User accepted install');
+      } else {
+        console.log('[FK] ❌ User dismissed install');
+      }
+
+      // Clear the prompt
       deferredInstallPrompt = null;
       bar.classList.remove('visible');
     });
   }
 
+  // Dismiss button handler
   if (dismissBtn) {
     dismissBtn.addEventListener('click', () => {
+      console.log('[FK] Install banner dismissed by user');
       bar.classList.remove('visible');
-      sessionStorage.setItem('fk_install_dismissed', '1');
+      sessionStorage.setItem(INSTALL_DISMISSED_KEY, '1');
     });
   }
 
-  // Hide bar if app is already installed (standalone mode)
-  if (window.matchMedia('(display-mode: standalone)').matches) {
+  // Listen for app installation
+  window.addEventListener('appinstalled', (evt) => {
+    console.log('[FK] 🎉 App successfully installed!');
+    isAppInstalled = true;
     bar.classList.remove('visible');
+    showToast('✅ App installed successfully!', 'success');
+  });
+
+  // Fallback: If event doesn't fire after 3 seconds, check conditions manually
+  setTimeout(() => {
+    if (!deferredInstallPrompt && !isAppInstalled) {
+      console.log('[FK] beforeinstallprompt did not fire, checking install eligibility...');
+      checkInstallEligibility();
+    }
+  }, 3000);
+}
+
+/* ── Check if app is already installed ── */
+function checkIfInstalled() {
+  // Method 1: Check display mode
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('[FK] App is running in standalone mode');
+    isAppInstalled = true;
+    return;
   }
+
+  // Method 2: Check if launched from home screen
+  if (window.navigator.standalone === true) {
+    console.log('[FK] App launched from iOS home screen');
+    isAppInstalled = true;
+    return;
+  }
+
+  // Method 3: Check URL params (some browsers add this)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('homescreen') === '1') {
+    console.log('[FK] App launched from home screen (via param)');
+    isAppInstalled = true;
+    return;
+  }
+
+  console.log('[FK] App is not installed (running in browser)');
+  isAppInstalled = false;
+}
+
+/* ── Check install eligibility and show fallback instructions ── */
+function checkInstallEligibility() {
+  const hasServiceWorker = 'serviceWorker' in navigator;
+  const hasManifest = document.querySelector('link[rel="manifest"]');
+  const isHTTPS = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+
+  console.log('[FK] Install eligibility check:', {
+    hasServiceWorker,
+    hasManifest: !!hasManifest,
+    isHTTPS,
+    isStandalone: window.matchMedia('(display-mode: standalone)').matches
+  });
+
+  if (!hasServiceWorker || !hasManifest || !isHTTPS) {
+    console.warn('[FK] App does not meet PWA install requirements');
+    return;
+  }
+
+  // If everything is OK but event didn't fire, show manual instructions
+  console.log('[FK] App meets requirements but install prompt not available');
+  // We can optionally show a hint here
+}
+
+/* ── Show manual install instructions ── */
+function showManualInstallInstructions() {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edg/i.test(navigator.userAgent);
+  const isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
+
+  let instructions = '';
+
+  if (isMobile && isChrome) {
+    instructions = '📱 Tap the menu (⋮) at top-right → "Add to Home screen" or "Install app"';
+  } else if (isMobile && isSafari) {
+    instructions = '📱 Tap the Share button (↑) → "Add to Home Screen"';
+  } else if (isMobile) {
+    instructions = '📱 Look for "Add to Home Screen" or "Install" in your browser menu';
+  } else {
+    instructions = '💻 Look for the install icon in your address bar or browser menu';
+  }
+
+  showToast(instructions, '');
+  console.log('[FK] Manual install instructions shown:', instructions);
 }
 
 /* =========================================================
@@ -475,7 +624,7 @@ function showToast(message, type = '') {
   setTimeout(() => {
     toast.classList.add('removing');
     toast.addEventListener('animationend', () => toast.remove(), { once: true });
-  }, 2400);
+  }, 3000);
 }
 
 /* =========================================================
@@ -518,6 +667,8 @@ function injectGlobalAnimation() {
    INIT ON DOM READY
    ========================================================= */
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('[FK] 🚀 App initializing...');
+
   // Register SW + init install prompt
   registerServiceWorker();
   initInstallPrompt();
@@ -529,7 +680,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const isShopPage = !!document.getElementById('fk-menu-list');
   const isHomePage = !!document.getElementById('fk-shops-grid');
 
-  if (isHomePage) renderShopCards();
-  if (isShopPage) initShopPage();
-});
+  if (isHomePage) {
+    console.log('[FK] Rendering homepage');
+    renderShopCards();
+  }
+  
+  if (isShopPage) {
+    console.log('[FK] Rendering shop page');
+    initShopPage();
+  }
 
+  console.log('[FK] ✅ App initialized successfully');
+});
