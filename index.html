@@ -8,19 +8,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="FoodKnock" />
-  <meta name="theme-color" content="#ff7a00">
   
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="/foodknockquickorder.com/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/foodknockquickorder.com/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/foodknockquickorder.com/icon-512.png">
   
   <!-- Open Graph -->
   <meta property="og:title" content="FoodKnock – Quick Order via WhatsApp" />
   <meta property="og:description" content="Browse local menus, build your cart, and send your order directly on WhatsApp." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="/foodknockquickorder.com/icon-512.png" />
 
   <title>FoodKnock – Quick Order</title>
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/foodknockquickorder.com/manifest.json" />
 
   <!-- Bootstrap 5 CSS -->
   <link rel="stylesheet"
@@ -46,14 +48,19 @@
   <!-- ╔══════════════════════════════╗ -->
   <!-- ║      PWA INSTALL BANNER      ║ -->
   <!-- ╚══════════════════════════════╝ -->
-  <div id="fk-install-bar" role="banner" aria-label="Install app prompt">
+  <div id="fk-install-bar" class="fk-install-banner" role="banner" aria-label="Install app prompt">
     <div class="install-text">
-      <span>📲</span>
-      <span>Install FoodKnock for the best experience</span>
+      <span class="install-icon">📲</span>
+      <div class="install-message">
+        <strong>Install FoodKnock</strong>
+        <span class="install-subtext">Get the app experience</span>
+      </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <button id="fk-install-btn" aria-label="Install app">Install App</button>
-      <button id="fk-install-dismiss" aria-label="Dismiss install prompt">✕</button>
+    <div class="install-actions">
+      <button id="fk-install-btn" class="install-btn-primary" aria-label="Install app">
+        <i class="bi bi-download"></i> Install
+      </button>
+      <button id="fk-install-dismiss" class="install-btn-close" aria-label="Dismiss install prompt">✕</button>
     </div>
   </div>
 
