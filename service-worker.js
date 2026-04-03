@@ -3,18 +3,20 @@
  * Provides offline caching and fast loading via Cache-First strategy
  */
 
-const CACHE_NAME   = 'foodknock-v2';
-const STATIC_CACHE = 'foodknock-static-v2';
+const CACHE_NAME = 'foodknock-v3';
+const STATIC_CACHE = 'foodknock-static-v3';
 
 /* ── Assets to pre-cache on install ── */
 const PRECACHE_URLS = [
-  './',
-  './index.html',
-  './shop.html',
-  './style.css',
-  './app.js',
-  './data.js',
-  './manifest.json',
+  '/foodknockquickorder.com/',
+  '/foodknockquickorder.com/index.html',
+  '/foodknockquickorder.com/shop.html',
+  '/foodknockquickorder.com/style.css',
+  '/foodknockquickorder.com/app.js',
+  '/foodknockquickorder.com/data.js',
+  '/foodknockquickorder.com/manifest.json',
+  '/foodknockquickorder.com/icon-192.png',
+  '/foodknockquickorder.com/icon-512.png',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
   'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',
@@ -65,9 +67,9 @@ self.addEventListener('fetch', event => {
           if (
             response.ok &&
             (url.origin === self.location.origin ||
-             url.hostname.includes('jsdelivr') ||
-             url.hostname.includes('fonts.gstatic') ||
-             url.hostname.includes('fonts.googleapis'))
+              url.hostname.includes('jsdelivr') ||
+              url.hostname.includes('fonts.gstatic') ||
+              url.hostname.includes('fonts.googleapis'))
           ) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
