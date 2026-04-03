@@ -1,24 +1,67 @@
 {
-  "name": "FK Quick Order",
-  "short_name": "FK Quick",
-  "description": "Order food from local shops via WhatsApp",
+  "name": "FoodKnock Quick Order",
+  "short_name": "FoodKnock",
+  "description": "Order food from local shops via WhatsApp — No login, no app needed",
   "start_url": "/foodknockquickorder.com/index.html",
   "scope": "/foodknockquickorder.com/",
+  "id": "/foodknockquickorder.com/",
   "display": "standalone",
-  "orientation": "portrait",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
   "theme_color": "#ff7a00",
   "background_color": "#fff8f3",
-
+  "categories": ["food", "shopping", "lifestyle"],
+  "prefer_related_applications": false,
+  
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/foodknockquickorder.com/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "/foodknockquickorder.com/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/foodknockquickorder.com/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/foodknockquickorder.com/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  
+  "screenshots": [
+    {
+      "src": "/foodknockquickorder.com/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "Browse Shops",
+      "short_name": "Shops",
+      "description": "View all available shops",
+      "url": "/foodknockquickorder.com/index.html",
+      "icons": [
+        {
+          "src": "/foodknockquickorder.com/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
