@@ -1,5 +1,5 @@
 {
-  "name": "FoodKnock Quick Order",
+  "name": "FK Quick Order",
 "short_name": "FK Quick",
   "description": "Order food from local shops directly via WhatsApp. No login, no app, just food.",
   "start_url": "/foodknockquickorder.com/index.html",
