@@ -7,7 +7,7 @@
    CONSTANTS & STATE
    ========================================================= */
 const CART_STORAGE_KEY = 'fk_carts_v2';
-const PAGE_SHOP_PARAM  = 'shop';
+const PAGE_SHOP_PARAM = 'shop';
 
 let currentShopId = null;
 let carts = {};
@@ -45,7 +45,7 @@ function saveCarts() {
 }
 
 function clearAllCarts() {
-  try { localStorage.removeItem(CART_STORAGE_KEY); } catch (_) {}
+  try { localStorage.removeItem(CART_STORAGE_KEY); } catch (_) { }
   carts = {};
 }
 
@@ -57,8 +57,8 @@ function clearShopCart(shopId) {
 /* =========================================================
    CART HELPERS
    ========================================================= */
-function getCart(shopId)         { return carts[shopId] || {}; }
-function getQty(shopId, itemId)  { return (carts[shopId] && carts[shopId][itemId]) ? carts[shopId][itemId] : 0; }
+function getCart(shopId) { return carts[shopId] || {}; }
+function getQty(shopId, itemId) { return (carts[shopId] && carts[shopId][itemId]) ? carts[shopId][itemId] : 0; }
 
 function cartTotal(shopId, menu) {
   const cart = getCart(shopId);
@@ -86,8 +86,7 @@ function setQty(shopId, itemId, qty) {
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('./service-worker.js')
+      navigator.serviceWorker.register('/foodknockquickorder.com/service-worker.js')
         .then(reg => {
           console.log('[FK] SW registered:', reg.scope);
         })
@@ -102,7 +101,7 @@ function registerServiceWorker() {
    PWA — INSTALL PROMPT
    ========================================================= */
 function initInstallPrompt() {
-  const bar        = document.getElementById('fk-install-bar');
+  const bar = document.getElementById('fk-install-bar');
   const installBtn = document.getElementById('fk-install-btn');
   const dismissBtn = document.getElementById('fk-install-dismiss');
   if (!bar) return;
@@ -208,17 +207,17 @@ function initShopPage() {
   }
 
   // Apply shop accent CSS variables globally
-  document.documentElement.style.setProperty('--shop-accent',    shop.accent);
+  document.documentElement.style.setProperty('--shop-accent', shop.accent);
   document.documentElement.style.setProperty('--shop-accent-lt', shop.accentLight);
-  document.documentElement.style.setProperty('--shop-gradient',  shop.gradient);
+  document.documentElement.style.setProperty('--shop-gradient', shop.gradient);
 
   // Update meta / title
   document.title = `${shop.name} — FoodKnock`;
 
   // Fill shop header
-  setText('fk-shop-emoji',     shop.emoji);
-  setText('fk-shop-name',      shop.name);
-  setText('fk-shop-cat',       shop.category);
+  setText('fk-shop-emoji', shop.emoji);
+  setText('fk-shop-name', shop.name);
+  setText('fk-shop-cat', shop.category);
   setText('fk-shop-tagline-h', shop.tagline);
 
   // Render menu: shimmer → real data
@@ -343,7 +342,7 @@ function refreshItemControl(shopId, itemId) {
    FLOATING CART BUTTON
    ========================================================= */
 function refreshCartFAB(shop) {
-  const fab   = document.getElementById('fk-cart-fab');
+  const fab = document.getElementById('fk-cart-fab');
   const badge = document.getElementById('fk-cart-count');
   if (!fab || !shop) return;
 
@@ -367,12 +366,12 @@ function openCartPanel() {
 
 function refreshCartPanel(shop) {
   if (!shop) return;
-  const body     = document.getElementById('fk-cart-body');
-  const totalEl  = document.getElementById('fk-cart-total');
+  const body = document.getElementById('fk-cart-body');
+  const totalEl = document.getElementById('fk-cart-total');
   const placeBtn = document.getElementById('fk-place-order-btn');
   if (!body) return;
 
-  const cart      = getCart(shop.id);
+  const cart = getCart(shop.id);
   const cartItems = shop.menu.filter(item => (cart[item.id] || 0) > 0);
 
   if (cartItems.length === 0) {
@@ -382,13 +381,13 @@ function refreshCartPanel(shop) {
         <div class="fk-cart-empty-title">Your cart is empty</div>
         <div class="fk-cart-empty-text">Add items from the menu above.</div>
       </div>`;
-    if (totalEl)  totalEl.textContent = '₹0';
+    if (totalEl) totalEl.textContent = '₹0';
     if (placeBtn) placeBtn.disabled = true;
     return;
   }
 
   body.innerHTML = cartItems.map(item => {
-    const qty      = cart[item.id];
+    const qty = cart[item.id];
     const subtotal = qty * item.price;
     return `
       <div class="fk-cart-row">
@@ -402,8 +401,8 @@ function refreshCartPanel(shop) {
   }).join('');
 
   const total = cartTotal(shop.id, shop.menu);
-  if (totalEl)  totalEl.textContent  = `₹${total}`;
-  if (placeBtn) placeBtn.disabled    = false;
+  if (totalEl) totalEl.textContent = `₹${total}`;
+  if (placeBtn) placeBtn.disabled = false;
 }
 
 function removeCartItem(shopId, itemId) {
@@ -421,7 +420,7 @@ function placeOrder() {
   const shop = SHOPS.find(s => s.id === currentShopId);
   if (!shop) return;
 
-  const cart      = getCart(shop.id);
+  const cart = getCart(shop.id);
   const cartItems = shop.menu.filter(item => (cart[item.id] || 0) > 0);
   if (cartItems.length === 0) return;
 
@@ -430,7 +429,7 @@ function placeOrder() {
     return `• ${item.name} x${qty} = ₹${qty * item.price}`;
   });
 
-  const total   = cartTotal(shop.id, shop.menu);
+  const total = cartTotal(shop.id, shop.menu);
   const message =
     `🛒 *FoodKnock New Order*\n` +
     `📍 Shop: ${shop.name}\n\n` +
